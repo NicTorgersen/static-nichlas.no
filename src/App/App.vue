@@ -2,7 +2,10 @@
     <div class="min-h-screen flex flex-col items-center justify-center text-center">
         <TransitionGroup name="fade" mode="out-in">
             <template v-for="(string, index) in stringsByCategory">
-                <div v-if="index === currentIndex" class="text-white text-6xl absolute whitespace-pre-line" :key="index">
+                <div v-if="index === currentIndex" class="flex flex-col text-white text-6xl absolute whitespace-pre-line" :key="index">
+                    <span class="block text-stone-500 text-lg">
+                        ({{ index + 1 }} / {{ stringsByCategory.length }})
+                    </span>
                     {{ string }}
                 </div>
             </template>
@@ -50,9 +53,8 @@ const strings = computed(() => {
             "✅ Følger ikke conventional commits\n\n(chore / feature / bugfix / hotfix)",
             "✅ Skrur ikke av auto fetching i IDE-en.",
             "✅ Kunden møter 500-feil rett etter lansering.",
-            "✅ Glemmer mocking iq testene.\n\n(sender SMS til Turid hver gang test suiten blir kjørt)",
+            "✅ Glemmer mocking i testene.\n\n(sender SMS til Turid hver gang test suiten blir kjørt)",
             "✅ Gjentar samme kodesnutt om og om igjen.",
-            ""
         ],
     }
 });
@@ -83,20 +85,44 @@ const easterEgg = (event) => {
     }
 }
 
-const updateStringIndex = (generator = "incremental") => {
+const updateStringIndex = ({generator = "incremental", incrementBy = 1} = {}) => {
     if (generator === "random") {
         return currentIndex.value = randomStringIndex(strings.value[currentCategory.value], currentIndex.value)
     }
 
     if (generator === "incremental") {
-        if (currentIndex.value === (stringsByCategory.value.length - 1)) {
-            console.log("array reset")
+        const indexAfterIncrement = currentIndex.value + incrementBy
+
+        // wrap around to start of string array
+        if (indexAfterIncrement === (stringsByCategory.value.length)) {
             return currentIndex.value = 0
         }
 
-        console.log("incrementing")
-        return currentIndex.value = currentIndex.value + 1
+        // wrap around to end of string array
+        if (indexAfterIncrement < 0) {
+            return currentIndex.value = stringsByCategory.value.length - 1
+        }
+
+        return currentIndex.value = currentIndex.value + incrementBy
     }
+}
+
+const nextString = (event) => {
+    const next = 39
+    const previous = 37
+
+    switch (event.keyCode) {
+        case next:
+            updateStringIndex()
+            break;
+        case previous:
+            updateStringIndex({incrementBy: -1})
+            break;
+    }
+
+    window.clearTimeout(timeoutId.value)
+
+    looper({ init: true })
 }
 
 const switchCategory = (category) => {
@@ -104,24 +130,28 @@ const switchCategory = (category) => {
 
     window.clearTimeout(timeoutId.value)
 
-    looper()
-    updateStringIndex("random")
+    looper({ init: true })
+    updateStringIndex({generator: "random"})
 }
 
-const looper = () => {
-    updateStringIndex()
+const looper = ({init = false} = {}) => {
+    if (! init) {
+        updateStringIndex()
+    }
 
     timeoutId.value = window.setTimeout(looper, loopInterval)
 }
 
 onMounted(() => {
-    looper()
+    looper({ init: true })
     window.addEventListener('keydown', easterEgg)
+    window.addEventListener('keydown', nextString)
 })
 
 onBeforeUnmount(() => {
     window.clearTimeout(timeoutId)
     window.removeEventListener('keydown', easterEgg)
+    window.removeEventListener('keydown', nextString)
 })
 </script>
 
