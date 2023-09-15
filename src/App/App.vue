@@ -69,7 +69,7 @@ const strings = computed(() => {
 const keysHit = ref("")
 const currentIndex = ref(0)
 const timeoutId = ref(null)
-const currentCategory = ref("positive")
+const currentCategory = ref("goretrek")
 const stringMatch = "starwars".split('')
 const stringsByCategory = computed(() => strings.value[currentCategory.value])
 
