@@ -1,5 +1,7 @@
 <template>
-
+    <div>
+        {{ string }}
+    </div>
 </template>
 
 <script setup>
