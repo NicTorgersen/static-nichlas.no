@@ -15,7 +15,7 @@ import EasterEgg from './EasterEgg/EasterEgg.vue'
 import TextTicker from './TextTicker/TextTicker.vue'
 
 const starWarsActive = ref(false)
-const tickerLoopInterval = ref(5000)
+const tickerLoopInterval = ref(10000)
 
 const strings = {
     positive: [
